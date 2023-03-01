@@ -20,6 +20,12 @@ async function getCatalogBySeller(req,res){
     }
     console.log(req.params.seller_id);
     let req_seller_id = req.params.seller_id;
+    let seller_query = await mongoQueries.find("users", {user_id: req_seller_id});
+    if(seller_query.length==0){
+        return res.status(StatusCodes.BAD_REQUEST).send({
+            message:"Invalid seller id provided"
+        });
+    }
     let catalog = await mongoQueries.find("catalogs", {seller_id: req_seller_id});
     let products = await mongoQueries.find("products", {catalog_id:catalog[0].catalog_id},{_id:0,product_id:1,product_name:1,product_cost:1});
     return res.status(StatusCodes.OK).send(products);
@@ -33,6 +39,12 @@ async function createOrder(req,res){
     }
     let orders = req.body.orders;
     let seller_id = req.params.seller_id;
+    let seller_query = await mongoQueries.find("users", {user_id: seller_id});
+    if(seller_query.length==0){
+        return res.status(StatusCodes.BAD_REQUEST).send({
+            message:"Invalid seller id provided"
+        });
+    }
     let user_id = req.session.uuid;
     let insert_orders = [];
     for(const order in orders){
